@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+using namespace std;
 
 class GraphNode; // forward declaration
 
@@ -15,8 +16,7 @@ private:
 
     // proprietary members
     int _id;
-    std::vector<std::string> _keywords; // list of topics associated with this edge
-    
+    vector<string> _keywords; // list of topics associated with this edge
 
 public:
     // constructor / desctructor
@@ -27,10 +27,10 @@ public:
     void SetChildNode(GraphNode *childNode);
     void SetParentNode(GraphNode *parentNode);
     GraphNode *GetChildNode() { return _childNode; }
-    std::vector<std::string> GetKeywords() { return _keywords; }
+    vector<string> GetKeywords() { return _keywords; }
 
     // proprietary functions
-    void AddToken(std::string token);
+    void AddToken(string token);
 };
 
 #endif /* GRAPHEDGE_H_ */

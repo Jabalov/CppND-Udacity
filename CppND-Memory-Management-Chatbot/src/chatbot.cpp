@@ -8,6 +8,8 @@
 #include "graphedge.h"
 #include "chatbot.h"
 
+using namespace std;
+
 // constructor WITHOUT memory allocation
 ChatBot::ChatBot()
 {
@@ -18,10 +20,10 @@ ChatBot::ChatBot()
 }
 
 // constructor WITH memory allocation
-ChatBot::ChatBot(std::string filename)
+ChatBot::ChatBot(string filename)
 {
     std::cout << "ChatBot Constructor" << std::endl;
-    
+
     // invalidate data handles
     _chatLogic = nullptr;
     _rootNode = nullptr;
@@ -32,10 +34,10 @@ ChatBot::ChatBot(std::string filename)
 
 ChatBot::~ChatBot()
 {
-    std::cout << "ChatBot Destructor" << std::endl;
+    cout << "ChatBot Destructor" << endl;
 
     // deallocate heap memory
-    if(_image != NULL) // Attention: wxWidgets used NULL and not nullptr
+    if (_image != NULL) // Attention: wxWidgets used NULL and not nullptr
     {
         delete _image;
         _image = NULL;
@@ -44,85 +46,86 @@ ChatBot::~ChatBot()
 
 //// STUDENT CODE
 ////
-
 //Copy Constructor
-ChatBot::ChatBot(const ChatBot& other)
-{ 
-  std::cout << "ChatBot Copy Constructor\n";
+ChatBot::ChatBot(const ChatBot &source)
+{
+    cout << "ChatBot Copy Constructor\n";
 
-  this->_image = new wxBitmap();
-  *_image = *other._image;
-  
-  this->_currentNode = other._currentNode;
-  this->_rootNode = other._rootNode;
-  this->_chatLogic = other._chatLogic;
-  this->_chatLogic->SetChatbotHandle(this);
-} 
+    this->_image = new wxBitmap();
+    *_image = *source._image;
+
+    this->_currentNode = source._currentNode;
+    this->_rootNode = source._rootNode;
+    this->_chatLogic = source._chatLogic;
+    this->_chatLogic->SetChatbotHandle(this);
+}
 
 //Copy Assignment
-ChatBot& ChatBot::operator=(const ChatBot& other)
-{ 
-	std::cout << "ChatBot Copy Assignment\n";
-	if(this == &other) { return *(this); }
-    this->_image = new wxBitmap();
-    *_image = *other._image;
+ChatBot &ChatBot::operator=(const ChatBot &source)
+{
+    cout << "ChatBot Copy Assignment\n";
 
-	this->_currentNode = other._currentNode;
-	this->_rootNode = other._rootNode;
-	this->_chatLogic = other._chatLogic;
+    if (this == &source)
+        return *(this);
+
+    this->_image = new wxBitmap();
+    *_image = *source._image;
+
+    this->_currentNode = source._currentNode;
+    this->_rootNode = source._rootNode;
+    this->_chatLogic = source._chatLogic;
     this->_chatLogic->SetChatbotHandle(this);
+
     return *(this);
 }
 
 //Move Constructor
-//_currentNode , _rootNode , _chatLogic
-ChatBot::ChatBot(ChatBot&& other)
-{ 
-    std::cout << "ChatBot Move Constructor\n";
-    this->_image = other._image;
-    other._image = nullptr;
+ChatBot::ChatBot(ChatBot &&source)
+{
+    cout << "ChatBot Move Constructor\n";
 
-    this->_currentNode = other._currentNode;
-    other._currentNode = nullptr;
+    this->_image = source._image;
+    source._image = nullptr;
 
-    this->_rootNode = other._rootNode;
-    other._rootNode = nullptr;
+    this->_currentNode = source._currentNode;
+    source._currentNode = nullptr;
 
-    this->_chatLogic = other._chatLogic;
+    this->_rootNode = source._rootNode;
+    source._rootNode = nullptr;
+
+    this->_chatLogic = source._chatLogic;
     this->_chatLogic->SetChatbotHandle(this);
-    other._chatLogic = nullptr;
+
+    source._chatLogic = nullptr;
 }
 
 //Move Assignment
-ChatBot& ChatBot::operator=(ChatBot&& other)
+ChatBot &ChatBot::operator=(ChatBot &&source)
 {
-    std::cout << "ChatBot Move Assignment\n";
-    if (this == &other) { return *(this); }
-    if(_image != nullptr) { delete _image; }
+    cout << "ChatBot Move Assignment\n";
 
-    this->_image = other._image;
-    other._image = nullptr;
+    if (this == &source)
+        return *(this);
 
-    this->_currentNode = other._currentNode;
-    other._currentNode = nullptr;
+    if (_image != nullptr)
+        delete _image;
 
-    this->_rootNode = other._rootNode;
-    other._rootNode = nullptr;
+    this->_image = source._image;
+    source._image = nullptr;
 
-    this->_chatLogic = other._chatLogic;
+    this->_currentNode = source._currentNode;
+    source._currentNode = nullptr;
+
+    this->_rootNode = source._rootNode;
+    source._rootNode = nullptr;
+
+    this->_chatLogic = source._chatLogic;
     _chatLogic->SetChatbotHandle(this);
 
-    other._chatLogic = nullptr;
-    
+    source._chatLogic = nullptr;
+
     return *(this);
-} 
-
-
-// ChatLogic::ChatLogic* getChatLogic()
-// {
-//      return std::move(_chatLogic);
-// }
-
+}
 ////
 //// EOF STUDENT CODE
 
@@ -206,9 +209,8 @@ int ChatBot::ComputeLevenshteinDistance(std::string s1, std::string s2)
         {
             size_t upper = costs[j + 1];
             if (*it1 == *it2)
-            {
                 costs[j + 1] = corner;
-            }
+
             else
             {
                 size_t t(upper < corner ? upper : corner);
