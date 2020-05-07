@@ -1,0 +1,125 @@
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <future>
+#include <random>
+
+#include "Street.h"
+#include "Intersection.h"
+#include "Vehicle.h"
+
+using namespace std;
+
+/* Implementation of class "WaitingVehicles" */
+
+int WaitingVehicles::getSize() { return _vehicles.size(); }
+
+void WaitingVehicles::pushBack(shared_ptr<Vehicle> vehicle, promise<void> &&promise)
+{
+    _vehicles.push_back(vehicle);
+    _promises.push_back(move(promise));
+}
+
+void WaitingVehicles::permitEntryToFirstInQueue()
+{
+    // L2.3 : First, get the entries from the front of _promises and _vehicles.
+    auto first_promise = _promises.begin();
+    auto first_vechicle = _vehicles.begin();
+
+    // Then, fulfill promise and send signal back that permission to enter has been granted.
+    first_promise->set_value();
+
+    // Finally, remove the front elements from both queues.
+    _vehicles.erase(first_vechicle);
+    _promises.erase(first_promise);
+}
+
+/* Implementation of class "Intersection" */
+
+Intersection::Intersection()
+{
+    _type = ObjectType::objectIntersection;
+    _isBlocked = false;
+}
+
+void Intersection::addStreet(shared_ptr<Street> street)
+{
+    _streets.push_back(street);
+}
+
+vector<shared_ptr<Street>> Intersection::queryStreets(shared_ptr<Street> incoming)
+{
+    // store all outgoing streets in a vector ...
+    vector<shared_ptr<Street>> outgoings;
+    for (auto it : _streets)
+    {
+        if (incoming->getID() != it->getID()) // ... except the street making the inquiry
+        {
+            outgoings.push_back(it);
+        }
+    }
+
+    return outgoings;
+}
+
+// adds a new vehicle to the queue and returns once the vehicle is allowed to enter
+void Intersection::addVehicleToQueue(shared_ptr<Vehicle> vehicle)
+{
+    cout << "Intersection #" << _id << "::addVehicleToQueue: thread id = " << this_thread::get_id() << endl;
+
+    // L2.2 : First, add the new vehicle to the waiting line by creating a promise, a corresponding future and then adding both to _waitingVehicles.
+    // Then, wait until the vehicle has been granted entry.
+
+    promise<void> prms;
+    future<void> ftr = prms.get_future();
+    _waitingVehicles.pushBack(vehicle, move(prms));
+
+    //winting for the vehicle to get enter grant
+    ftr.wait();
+
+    cout << "Intersection #" << _id << ": Vehicle #" << vehicle->getID() << " is granted entry." << endl;
+}
+
+void Intersection::vehicleHasLeft(shared_ptr<Vehicle> vehicle)
+{
+    //cout << "Intersection #" << _id << ": Vehicle #" << vehicle->getID() << " has left." << endl;
+
+    // unblock queue processing
+    this->setIsBlocked(false);
+}
+
+void Intersection::setIsBlocked(bool isBlocked)
+{
+    _isBlocked = isBlocked;
+    //cout << "Intersection #" << _id << " isBlocked=" << isBlocked << endl;
+}
+
+// virtual function which is executed in a thread
+void Intersection::simulate() // using threads + promises/futures + exceptions
+{
+    // launch vehicle queue processing in a thread
+    threads.emplace_back(thread(&Intersection::processVehicleQueue, this));
+}
+
+void Intersection::processVehicleQueue()
+{
+    // print id of the current thread
+    //cout << "Intersection #" << _id << "::processVehicleQueue: thread id = " << this_thread::get_id() << endl;
+
+    // continuously process the vehicle queue
+    while (true)
+    {
+        // sleep at every iteration to reduce CPU usage
+        this_thread::sleep_for(chrono::milliseconds(1));
+
+        // only proceed when at least one vehicle is waiting in the queue
+        if (_waitingVehicles.getSize() > 0 && !_isBlocked)
+        {
+            // set intersection to "blocked" to prevent other vehicles from entering
+            this->setIsBlocked(true);
+
+            // permit entry to first vehicle in the queue (FIFO)
+            _waitingVehicles.permitEntryToFirstInQueue();
+        }
+    }
+}
