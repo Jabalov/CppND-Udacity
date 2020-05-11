@@ -50,5 +50,5 @@ There are 5 classes in My Submitted implementation.<br>
    
 3. The project uses Object Oriented Programming techniques. The **Logger class** and **Other classes** are defined to improve the program.
    
-5. Implemented a Monitor Object Pattern Class named Motivate, to send motivational warnings to the player using concepts i learned about like **like threads, shared pointers, locks, condition variables, mutex.
+5. Implemented a Monitor Object Pattern Class named Motivate, to send motivational warnings to the player using concepts i learned about like **like threads, shared pointers, locks, condition variables, mutex**.
    
